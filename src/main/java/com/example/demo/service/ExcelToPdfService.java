@@ -1,5 +1,6 @@
 package com.example.demo.service;
 
+import lombok.extern.log4j.Log4j2;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import com.itextpdf.text.Document;
@@ -9,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import java.io.*;
 
+@Log4j2
 @Service
 public class ExcelToPdfService {
 
@@ -36,6 +38,7 @@ public class ExcelToPdfService {
             }
         } finally {
             pdfDocument.close();
+            log.info("123");
         }
 
         return pdfFilePath; // Trả về đường dẫn file PDF đã tạo
