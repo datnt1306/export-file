@@ -1,5 +1,7 @@
 package com.example.demo.service;
 
+import com.example.demo.entity.User;
+import com.example.demo.repository.UserRepository;
 import com.lowagie.text.Document;
 import com.lowagie.text.Paragraph;
 import com.lowagie.text.pdf.PdfWriter;
@@ -15,6 +17,7 @@ import org.springframework.stereotype.Service;
 import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 
@@ -23,6 +26,9 @@ public class ExcelService {
 
     @Value("${template.exel}")
     private String template;
+
+    @Autowired
+    private UserRepository userRepository;
 
     private Map<String, Object> getDataFromDatabase() {
         Map<String, Object> data = new HashMap<>();
@@ -38,12 +44,23 @@ public class ExcelService {
 
     @SneakyThrows
     public ByteArrayOutputStream generateExel() {
+
         Map<String, Object> data =  this.getDataFromDatabase();
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 
         FileInputStream fileInputStream = new FileInputStream(template);
         Workbook workbook = new XSSFWorkbook(fileInputStream);
         Sheet sheet = workbook.getSheetAt(0);
+
+        List<User> users = userRepository.findAll();
+        int rowNum = 20;
+        for (User user : users) {
+            Row row = sheet.getRow(rowNum);
+            row.getCell(1).setCellValue(String.valueOf(user.getId()));
+            row.getCell(2).setCellValue(user.getName());
+            row.getCell(3).setCellValue(user.getEmail());
+            rowNum++;
+        }
         for (Row row : sheet) {
             for (Cell cell : row) {
                 if (cell.getCellType() == CellType.STRING) {
@@ -59,6 +76,8 @@ public class ExcelService {
             }
         }
         workbook.write(outputStream);
+        workbook.close();
+        outputStream.close();
         return outputStream;
     }
 }
